@@ -13,7 +13,7 @@
 	import { getKnowledgeItems } from '$lib/apis/knowledge';
 	import { getFunctions } from '$lib/apis/functions';
 	import { getModels as _getModels, getVersionUpdates } from '$lib/apis';
-	import { getAllChatTags } from '$lib/apis/chats';
+	import { getAllChatTags, getChatListByUserId} from '$lib/apis/chats';
 	import { getPrompts } from '$lib/apis/prompts';
 	import { getTools } from '$lib/apis/tools';
 	import { getBanners } from '$lib/apis/configs';
@@ -35,7 +35,8 @@
 		banners,
 		showSettings,
 		showChangelog,
-		temporaryChatEnabled
+		temporaryChatEnabled,
+		history
 	} from '$lib/stores';
 
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
@@ -67,6 +68,8 @@
 				if (DB) {
 					const chats = await DB.getAllFromIndex('chats', 'timestamp');
 					localDBChats = chats.map((item, idx) => chats[chats.length - 1 - idx]);
+
+
 
 					if (localDBChats.length === 0) {
 						await deleteDB('Chats');
@@ -118,8 +121,16 @@
 				})(),
 				(async () => {
 					tags.set(await getAllChatTags(localStorage.token));
+				})(),
+				(async () => {
+					history.set(await getChatListByUserId(localStorage.token, $user.id));
 				})()
 			]);
+
+			// let chats = await getChatListByUserId(localStorage.token, $user.id);
+			// console.log('chats')
+			// console.log(chats)
+        	// history.set(chats)
 
 			document.addEventListener('keydown', function (event) {
 				const isCtrlPressed = event.ctrlKey || event.metaKey; // metaKey is for Cmd key on Mac
@@ -189,6 +200,12 @@
 			if ($user.role === 'admin') {
 				showChangelog.set(localStorage.version !== $config.version);
 			}
+
+			if ($user.role === 'admin') {
+				await goto('/');
+			}
+			loaded = true;
+    			
 
 			if ($page.url.searchParams.get('temporary-chat') === 'true') {
 				temporaryChatEnabled.set(true);

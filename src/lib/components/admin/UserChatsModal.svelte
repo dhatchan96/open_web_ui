@@ -28,6 +28,7 @@
 		(async () => {
 			if (user.id) {
 				chats = await getChatListByUserId(localStorage.token, user.id);
+				console.log('changed here')
 			}
 		})();
 	}

@@ -760,3 +760,34 @@ export const archiveAllChats = async (token: string) => {
 
 	return res;
 };
+
+export const getMeaning = async (word: string) => {
+    let error = null;
+
+    const res = await fetch(`http://localhost:5000/meaning?word=${word}`, {
+        method: 'GET',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(async (res) => {
+            if (!res.ok) throw await res.json();
+            return res.json();
+        })
+        .then((json) => {
+            return json;
+        })
+        .catch((err) => {
+            error = err;
+
+            console.log(err);
+            return null;
+        });
+
+    if (error) {
+        throw error;
+    }
+
+    return res;
+};
